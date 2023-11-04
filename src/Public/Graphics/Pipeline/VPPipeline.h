@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "Graphics/VertexBuffer/VPModel.h"
 #include "App/Utils/VPEngineDevice.h"
 namespace VP {
 

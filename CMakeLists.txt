@@ -17,6 +17,8 @@ add_executable(${PROJECT_NAME} main.cpp
         src/Private/Graphics/Pipeline/VPPipeline.cpp
         src/Private/App/Utils/VPEngineDevice.cpp
         src/Private/Graphics/Pipeline/VPEngineSwapChain.cpp
+        src/Private/Graphics/VertexBuffer/VPModel.cpp
+        src/Public/Graphics/VertexBuffer/VPModel.h
 )
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)

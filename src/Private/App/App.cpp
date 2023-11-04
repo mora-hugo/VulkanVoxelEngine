@@ -17,6 +17,7 @@ void VP::App::run() {
 }
 
 VP::App::App() {
+    loadModels();
     createPipelineLayout();
     createPipeline();
     createCommandBuffers();
@@ -86,7 +87,8 @@ void VP::App::createCommandBuffers() {
         vkCmdBeginRenderPass(commandBuffers[i],&renderPassInfo,VK_SUBPASS_CONTENTS_INLINE);
 
         Pipeline->bind(commandBuffers[i]);
-        vkCmdDraw(commandBuffers[i],3,1,0,0);
+        model->bind(commandBuffers[i]);
+        model->draw(commandBuffers[i]);
 
         vkCmdEndRenderPass(commandBuffers[i]);
         if(vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
@@ -113,4 +115,27 @@ void VP::App::drawFrame() {
     }
 
 
+}
+
+void VP::App::loadModels() {
+    std::vector<VPModel::Vertex> vertices {};
+    sierpiski(vertices, 5, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
+
+    model = std::make_unique<VPModel>(Device,vertices);
+}
+
+void
+VP::App::sierpiski(std::vector<VPModel::Vertex> &vertices, int depth, glm::vec2 left, glm::vec2 right, glm::vec2 top) {
+    if (depth <= 0) {
+        vertices.push_back({top});
+        vertices.push_back({right});
+        vertices.push_back({left});
+    } else {
+        auto leftTop = 0.5f * (left + top);
+        auto rightTop = 0.5f * (right + top);
+        auto leftRight = 0.5f * (left + right);
+        sierpiski(vertices, depth - 1, left, leftRight, leftTop);
+        sierpiski(vertices, depth - 1, leftRight, right, rightTop);
+        sierpiski(vertices, depth - 1, leftTop, rightTop, top);
+    }
 }

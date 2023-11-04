@@ -28,6 +28,12 @@ namespace VP {
         static constexpr int HEIGHT = 600;
 
     private:
+        void sierpiski(std::vector<VPModel::Vertex> &vertices,
+                       int depth,
+                       glm::vec2 left,
+                       glm::vec2 right,
+                       glm::vec2 top);
+        void loadModels();
         void createPipelineLayout();
         void createPipeline();
         void createCommandBuffers();
@@ -38,6 +44,7 @@ namespace VP {
         std::unique_ptr<VPPipeline> Pipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;
+        std::unique_ptr<VPModel> model;
 
     };
 
