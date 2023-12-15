@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "App/Utils/VPEngineDevice.h"
+#include "VPEngineDevice.h"
 
 // libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 
 namespace VP {
     class VPModel {
@@ -15,7 +15,8 @@ namespace VP {
             static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
             static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 
-            glm::vec2 position;
+            glm::vec3 position;
+            glm::vec3 color;
 
         };
         VPModel(VPEngineDevice& device, const std::vector<Vertex>& vertices);

@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <vector>
 #include <cstring>
-#include "App/App.h"
+#include "Rendering/App.h"
 
 
 using namespace VP;

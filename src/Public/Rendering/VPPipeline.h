@@ -2,11 +2,14 @@
 
 #include <string>
 #include <vector>
-#include "Graphics/VertexBuffer/VPModel.h"
-#include "App/Utils/VPEngineDevice.h"
+#include "VPModel.h"
+#include "VPEngineDevice.h"
 namespace VP {
 
     struct PipelineConfigInfo {
+        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+
         VkViewport viewport;
         VkRect2D scissor;
         VkPipelineViewportStateCreateInfo viewportInfo;
@@ -16,6 +19,8 @@ namespace VP {
         VkPipelineColorBlendAttachmentState colorBlendAttachment;
         VkPipelineColorBlendStateCreateInfo colorBlendInfo;
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        std::vector<VkDynamicState> dynamicStateEnables;
+        VkPipelineDynamicStateCreateInfo dynamicStateInfo;
         VkPipelineLayout pipelineLayout = nullptr;
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
@@ -26,10 +31,10 @@ namespace VP {
         ~VPPipeline();
 
         VPPipeline(const VPPipeline&) = delete;
-        void operator=(const VPPipeline&) = delete;
+        VPPipeline& operator=(const VPPipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
-        static PipelineConfigInfo GetDefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+        static void GetDefaultPipelineConfigInfo(PipelineConfigInfo &configInfo);
 
     private:
         static std::vector<char> ReadFile(const std::string& filepath);

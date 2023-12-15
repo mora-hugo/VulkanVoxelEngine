@@ -2,7 +2,7 @@
 // Created by hugom on 04/11/2023.
 //
 
-#include "Graphics/VertexBuffer/VPModel.h"
+#include "Rendering/VPModel.h"
 
 VP::VPModel::VPModel(VP::VPEngineDevice &device, const std::vector<Vertex> &vertices) : device{device} {
     createVertexBuffer(vertices);
@@ -48,10 +48,16 @@ std::vector<VkVertexInputBindingDescription> VP::VPModel::Vertex::getBindingDesc
 }
 
 std::vector<VkVertexInputAttributeDescription> VP::VPModel::Vertex::getAttributeDescriptions() {
-    std::vector<VkVertexInputAttributeDescription> bindingDescriptions(1);
-    bindingDescriptions[0].binding = 0;
-    bindingDescriptions[0].location = 0; //position in the vertex shader
-    bindingDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-    bindingDescriptions[0].offset = offsetof(Vertex, position);
-    return bindingDescriptions;
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0; //position in the vertex shader
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[0].offset = offsetof(Vertex, position);
+
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1; //position in the vertex shader
+    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+    return attributeDescriptions;
 }
