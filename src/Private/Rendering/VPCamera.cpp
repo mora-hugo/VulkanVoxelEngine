@@ -69,3 +69,4 @@ void VP::VPCamera::SetViewYXZ(const glm::vec3 &position, const glm::vec3 &rotati
     viewMatrix[3][1] = -glm::dot(v, position);
     viewMatrix[3][2] = -glm::dot(w, position);
 }
+

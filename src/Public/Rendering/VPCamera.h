@@ -23,6 +23,8 @@ namespace VP {
 
         void SetViewYXZ(const glm::vec3 &position, const glm::vec3& rotation);
 
+        void AddPosition(const glm::vec3& position);
+
     private:
         glm::mat4 projectionMatrix {1.f};
         glm::mat4 viewMatrix {1.f};

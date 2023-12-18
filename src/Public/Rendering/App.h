@@ -12,6 +12,7 @@
 #include "VPRendering.h"
 #include "glm/gtc/constants.hpp"
 #include "VPCamera.h"
+#include "Inputs/VPInputManager.h"
 
 namespace VP {
 
@@ -26,6 +27,9 @@ namespace VP {
         App(const App&) = delete;
         App &operator=(const App&) = delete;
 
+        VPInputManager& GetInputManager() { return inputManager; }
+
+
 
 
     private:
@@ -38,15 +42,17 @@ namespace VP {
     private:
         void loadGameObjects();
         std::unique_ptr<VPModel> createCubeModel(VPEngineDevice& device, glm::vec3 offset);
-            VPWindow Window{WIDTH, HEIGHT, "Vulkan project window"};
-            VPEngineDevice Device{Window};
-            VPRenderer Renderer{Window, Device};
-            VPCamera camera{};
+        VPWindow Window{WIDTH, HEIGHT, "Vulkan project window"};
+        VPEngineDevice Device{Window};
+        VPRenderer Renderer{Window, Device};
+        VPCamera camera{};
+        VPInputManager inputManager{};
 
 
-            std::vector<VPGameObject> gameObjects;
 
-        };
+        std::vector<VPGameObject> gameObjects;
+
+    };
 
 }
 

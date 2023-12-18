@@ -22,6 +22,9 @@ add_executable(${PROJECT_NAME}
         src/Private/Rendering/VPRendering.cpp
         src/Private/Rendering/VPSimpleRenderSystem.cpp
         src/Private/Rendering/VPCamera.cpp
+        src/Private/Inputs/KeyboardInput.cpp
+        src/Private/Inputs/VPInputManager.cpp
+        src/Private/Inputs/VPPlayerController.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)

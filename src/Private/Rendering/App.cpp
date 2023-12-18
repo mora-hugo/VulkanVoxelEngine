@@ -1,5 +1,6 @@
 
 #include "Rendering/App.h"
+#include "Inputs/VPInputManager.h"
 #define GLFW_INCLUDE_VULKAN
 
 #define GLM_FORCE_RADIANS
@@ -10,20 +11,35 @@
 #include "glm/gtc/constants.hpp"
 #include <stdexcept>
 #include <array>
+#include <iostream>
 
 #include "Rendering/VPGameObject.h"
 #include "Rendering/VPSimpleRenderSystem.h"
-
+#include "Inputs/VPPlayerController.h"
 
 
 void VP::App::run() {
     VPSimpleRenderSystem simpleRenderSystem{Device, Renderer.GetSwapChainRenderPass()};
     camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.0f, 0.f, 1.f));
+
+    auto ViewerObject = VPGameObject::create();
+    VPPlayerController playerController{};
+    playerController.BindCallbacks(&ViewerObject, &inputManager);
+
+
+
     while(!Window.ShouldClose()) {
         glfwPollEvents();
         float aspect = Renderer.GetAspectRatio();
         //camera.SetOrthographicProjection(-aspect, aspect, -1.f, 1.f, -1.f, 1.f);
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
+
+        // Process input and call callbacks
+        inputManager.ProcessInput(Window.GetGLFWWindow());
+        camera.SetViewYXZ(ViewerObject.transform.translation, ViewerObject.transform.rotation);
+
+
+
         if(auto commandBuffer = Renderer.BeginFrame()) {
 
             //Begin offscreen shadow pass
@@ -41,6 +57,7 @@ void VP::App::run() {
 }
 
 VP::App::App() {
+    Window.InitWindow(this);
     loadGameObjects();
     run();
 }
