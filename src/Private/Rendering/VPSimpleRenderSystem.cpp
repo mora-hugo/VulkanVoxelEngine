@@ -10,8 +10,10 @@
 #include "glm/gtc/constants.hpp"
 #include <stdexcept>
 #include <array>
+#include <iostream>
 
 #include "Rendering/VPGameObject.h"
+#include "Rendering/VPSimpleRenderSystem.h"
 
 
 struct SimplePushConstantData {
@@ -75,9 +77,6 @@ void VP::VPSimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, 
     Pipeline->bind(commandBuffer);
     auto projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
     for(auto& obj : gameObjects) {
-
-
-        obj.transform.rotation.x = glm::mod(obj.transform.rotation.x + 0.01f, glm::two_pi<float>());
 
         SimplePushConstantData push{};
 

@@ -36,6 +36,7 @@ namespace VP {
         void bind(VkCommandBuffer commandBuffer);
         static void GetDefaultPipelineConfigInfo(PipelineConfigInfo &configInfo);
 
+
     private:
         static std::vector<char> ReadFile(const std::string& filepath);
         void CreateGraphicsPipeline(const std::string & vertFilepath, const std::string & fragFilepath, const PipelineConfigInfo & configData);

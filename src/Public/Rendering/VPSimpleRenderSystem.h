@@ -23,7 +23,6 @@ namespace VP {
         VPSimpleRenderSystem(const VPSimpleRenderSystem&) = delete;
         VPSimpleRenderSystem &operator=(const VPSimpleRenderSystem&) = delete;
 
-
         void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<VPGameObject>& gameObjects, const VPCamera& camera);
 
     private:

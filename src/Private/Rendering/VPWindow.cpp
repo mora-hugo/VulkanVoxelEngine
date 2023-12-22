@@ -8,6 +8,7 @@
 #include <iostream>
 #include <functional>
 
+
 void VP::VPWindow::InitWindow(App* app) {
     this->AppRef = app;
 
@@ -21,8 +22,10 @@ VP::VPWindow::VPWindow(int width, int height, const std::string &windowName) : W
     // Remove window resizing
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
+
     Window = glfwCreateWindow(Width,Height,WindowName.c_str(), nullptr,nullptr);
     glfwSetWindowUserPointer(Window, this);
+
 
     /* Callbacks from GLFW */
     glfwSetFramebufferSizeCallback(Window, frameBufferResizedCallback);

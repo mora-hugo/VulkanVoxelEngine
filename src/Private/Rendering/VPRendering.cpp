@@ -11,6 +11,7 @@
 
 #include "Rendering/VPRendering.h"
 
+
 struct SimplePushConstantData {
     glm::mat2 transform {1.0f};
     glm::vec2 offset;
@@ -43,6 +44,7 @@ void VP::VPRenderer::createCommandBuffers() {
     if(vkAllocateCommandBuffers(Device.device(),&allocInfo,commandBuffers.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers");
     }
+
 
 
 
@@ -104,9 +106,15 @@ VkCommandBuffer VP::VPRenderer::BeginFrame() {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
+    //IMGUI
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
     if(vkBeginCommandBuffer(commandBuffer,&beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer");
     }
+
+
+
 
     return commandBuffer;
 
@@ -117,6 +125,8 @@ VkCommandBuffer VP::VPRenderer::BeginFrame() {
 void VP::VPRenderer::EndFrame() {
     assert(isFrameStarted && "Can't call BeginFrame while already in progress");
     auto commandBuffer = GetCurrentCommandBuffer();
+
+
 
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer");
@@ -165,6 +175,8 @@ void VP::VPRenderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
     VkRect2D scissor{{0, 0}, SwapChain->getSwapChainExtent()};
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+
 
 }
 

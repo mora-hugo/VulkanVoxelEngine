@@ -40,6 +40,7 @@ namespace VP {
 
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        VkDescriptorPool GetDescriptorPool() const { return descriptorPool; }
 
     private:
 
@@ -62,6 +63,7 @@ namespace VP {
         int currentFrameIndex = 0;
         bool isFrameStarted = false;
 
+        VkDescriptorPool descriptorPool;
     };
 
 }

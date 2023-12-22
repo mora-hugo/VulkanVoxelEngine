@@ -33,7 +33,7 @@ void VPInputManager::QueueKeyboardInput(const KeyboardInput &input) {
     keyboardInputs.push(input);
 }
 
-void VPInputManager::ProcessInput(GLFWwindow* window) {
+void VPInputManager::ProcessInput() {
     // Processing REPEATING keys (Input polling)
     for(std::pair<int, std::map<std::string , Callback>> pair : callbacks_keyboard_repeat) {
         if(glfwGetKey(window, pair.first) == GLFW_PRESS) {
@@ -47,7 +47,7 @@ void VPInputManager::ProcessInput(GLFWwindow* window) {
     while(!keyboardInputs.empty()) {
         const KeyboardInput& input = UnqueueKeyboardInput();
         auto callbacks = GetKeyboardCallbackFromAction(input.action);
-        if(callbacks->find(input.key) == callbacks->end()) {
+        if(!callbacks || callbacks->find(input.key) == callbacks->end()) {
             continue;
         }
 
@@ -61,8 +61,8 @@ void VPInputManager::ProcessInput(GLFWwindow* window) {
         const MouseInput& input = UnqueueMouseInput();
         auto callbacks = GetMouseCallbackFromAction(input.action);
 
-        if(!callbacks) continue;
-        if(callbacks->find(input.key) == callbacks->end()) {
+        ;
+        if(!callbacks || callbacks->find(input.key) == callbacks->end()) {
             continue;
         }
 
@@ -147,4 +147,16 @@ const MouseInput &VPInputManager::UnqueueMouseInput() {
 
 void VPInputManager::QueueMouseInput(const MouseInput &input) {
     MouseInputs.push(input);
+}
+
+bool VPInputManager::IsKeyPressed(int key) {
+    return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
+bool VPInputManager::IsMouseKeyPressed(int key) {
+    return glfwGetMouseButton(window, key) == GLFW_PRESS;
+}
+
+VPInputManager::VPInputManager(GLFWwindow *context_window) : window(context_window) {
+
 }

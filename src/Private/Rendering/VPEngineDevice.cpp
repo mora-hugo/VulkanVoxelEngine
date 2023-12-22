@@ -191,6 +191,8 @@ void VPEngineDevice::createCommandPool() {
   if (vkCreateCommandPool(device_, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
     throw std::runtime_error("failed to create command pool!");
   }
+
+
 }
 
 void VPEngineDevice::createSurface() { window.CreateWindowSurface(instance, &surface_); }

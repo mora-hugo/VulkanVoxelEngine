@@ -13,18 +13,25 @@
 #include <array>
 #include <iostream>
 
+
+
+
 #include "Rendering/VPGameObject.h"
 #include "Rendering/VPSimpleRenderSystem.h"
 #include "Inputs/VPPlayerController.h"
+#include "tiny_obj_loader.h"
+
+
+
 
 
 void VP::App::run() {
-    VPSimpleRenderSystem simpleRenderSystem{Device, Renderer.GetSwapChainRenderPass()};
-    camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.0f, 0.f, 1.f));
+    camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.0f, 1.f, 0.0f));
 
     auto ViewerObject = VPGameObject::create();
     VPPlayerController playerController{};
     playerController.BindCallbacks(&ViewerObject, &inputManager);
+
 
 
 
@@ -35,7 +42,8 @@ void VP::App::run() {
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
         // Process input and call callbacks
-        inputManager.ProcessInput(Window.GetGLFWWindow());
+        inputManager.ProcessInput();
+
         camera.SetViewYXZ(ViewerObject.transform.translation, ViewerObject.transform.rotation);
 
 
@@ -47,8 +55,14 @@ void VP::App::run() {
             //End offscreen shadow pass
             Renderer.BeginSwapChainRenderPass(commandBuffer);
             simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+
+
             Renderer.EndSwapChainRenderPass(commandBuffer);
+
             Renderer.EndFrame();
+
+
+
         }
     }
 
@@ -58,86 +72,36 @@ void VP::App::run() {
 
 VP::App::App() {
     Window.InitWindow(this);
+
     loadGameObjects();
     run();
 }
 
 VP::App::~App() {
-
 }
 
 void VP::App::loadGameObjects() {
     glm::vec3 color = {1.0f, 0.0f, 0.0f};
+    const auto cubemodel = VPModel::Builder::createModelFromFile(Device,"../models/colored_cube.obj");
+    for(int i = 0; i < 10000; ++i) {
 
-    std::shared_ptr<VPModel> model = createCubeModel(Device, {0.0f, 0.0f, 0.f});
+        auto cube = VPGameObject::create();
+        cube.model = cubemodel;
+        cube.transform.translation = {0.0f, 0.0f, 1.f*i};
+        cube.transform.scale = {.5f, .5f, .5f};
+        cube.transform.rotation = {0.0f, 0.0f, 0.0f};
+        cube.color = color;
+        gameObjects.push_back(std::move(cube));
 
-    auto cube = VPGameObject::create();
-    cube.model = model;
-    cube.transform.translation = {.0f, .0f, 2.5f};
-    cube.transform.scale = {.5f, .5f, .5f};
-    gameObjects.push_back(std::move(cube));
-
-}
-
-std::unique_ptr<VP::VPModel> VP::App::createCubeModel(VP::VPEngineDevice& device, glm::vec3 offset) {
-    std::vector<VP::VPModel::Vertex> vertices{
-
-            // left face (white)
-            {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-            {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-            {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-            {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-            {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-            {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-
-            // right face (yellow)
-            {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-            {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-            {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-            {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-
-            // top face (orange, remember y axis points down)
-            {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-            {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-            {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-
-            // bottom face (red)
-            {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-            {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-            {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-
-            // nose face (blue)
-            {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-            {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-            {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-
-            // tail face (green)
-            {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-            {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-            {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-
-
-
-    };
-    for (auto& v : vertices) {
-        v.position += offset;
     }
-    return std::make_unique<VP::VPModel>(device, vertices);
+
+
+
+
 }
+
+
+
 
 
 

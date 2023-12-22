@@ -12,6 +12,12 @@ using MouseCallback = std::function<void(glm::vec2)>;
 class VPInputManager {
 
 public:
+    VPInputManager(GLFWwindow* context_window);
+    ~VPInputManager() {};
+    //Delete copy constructor and assignment operator
+    VPInputManager(const VPInputManager&) = delete;
+    VPInputManager& operator=(const VPInputManager&) = delete;
+
     /* Keyboard */
     void AddKeyboardCallback(int key, KeyboardAction action, const std::string& name, Callback callback);
     void RemoveKeyboardCallback(int key, KeyboardAction action, const std::string& name);
@@ -22,7 +28,10 @@ public:
     void RemoveMouseCallback(int key, MouseAction action, const std::string& name);
     void QueueMouseInput(const MouseInput& input);
 
-    void ProcessInput(GLFWwindow* window);
+    void ProcessInput();
+
+    bool IsKeyPressed(int key);
+    bool IsMouseKeyPressed(int key);
 private:
     void Reset();
 
@@ -48,4 +57,6 @@ private:
 
     std::queue<KeyboardInput> keyboardInputs;
     std::queue<MouseInput> MouseInputs;
+
+    GLFWwindow* window;
 };

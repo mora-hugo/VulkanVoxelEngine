@@ -23,6 +23,7 @@ namespace VP {
 
         GLFWwindow* window;
         VPGameObject * target;
+        glm::vec2 previousMousePosition;
     };
 
 }
