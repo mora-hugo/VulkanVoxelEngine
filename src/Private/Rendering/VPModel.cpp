@@ -48,7 +48,7 @@ void VP::VPModel::draw(VkCommandBuffer commandBuffer) {
     }
     else {
         vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
-    }
+        }
 
 }
 
@@ -61,6 +61,8 @@ void VP::VPModel::bind(VkCommandBuffer commandBuffer) {
     if(hasIndexBuffer) {
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     }
+
+
 
 }
 

@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <array>
 #include <iostream>
+#include <chrono>
 
 
 
@@ -20,9 +21,7 @@
 #include "Rendering/VPSimpleRenderSystem.h"
 #include "Inputs/VPPlayerController.h"
 #include "tiny_obj_loader.h"
-
-
-
+#include "World/Chunk.h"
 
 
 void VP::App::run() {
@@ -31,7 +30,9 @@ void VP::App::run() {
     auto ViewerObject = VPGameObject::create();
     VPPlayerController playerController{};
     playerController.BindCallbacks(&ViewerObject, &inputManager);
-
+    auto currentTimestamp = std::chrono::high_resolution_clock::now();
+    auto previousTimestamp = std::chrono::high_resolution_clock::now();
+    auto deltaTime = 0.f;
 
 
 
@@ -42,11 +43,10 @@ void VP::App::run() {
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
         // Process input and call callbacks
-        inputManager.ProcessInput();
 
         camera.SetViewYXZ(ViewerObject.transform.translation, ViewerObject.transform.rotation);
 
-
+        inputManager.ProcessInput();
 
         if(auto commandBuffer = Renderer.BeginFrame()) {
 
@@ -64,6 +64,10 @@ void VP::App::run() {
 
 
         }
+        deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTimestamp - previousTimestamp).count();
+        previousTimestamp = currentTimestamp;
+        currentTimestamp = std::chrono::high_resolution_clock::now();
+        glfwSetWindowTitle(Window.GetGLFWWindow(), std::to_string(((int)1.f/deltaTime)).c_str());
     }
 
     // wait all ressources to be free
@@ -82,18 +86,30 @@ VP::App::~App() {
 
 void VP::App::loadGameObjects() {
     glm::vec3 color = {1.0f, 0.0f, 0.0f};
-    const auto cubemodel = VPModel::Builder::createModelFromFile(Device,"../models/colored_cube.obj");
-    for(int i = 0; i < 10000; ++i) {
+    for(int x = -10; x < 10; x++) {
 
-        auto cube = VPGameObject::create();
-        cube.model = cubemodel;
-        cube.transform.translation = {0.0f, 0.0f, 1.f*i};
-        cube.transform.scale = {.5f, .5f, .5f};
-        cube.transform.rotation = {0.0f, 0.0f, 0.0f};
-        cube.color = color;
-        gameObjects.push_back(std::move(cube));
+        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+        Chunk chunk = Chunk::Build();
+        std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+        std::cout << "Chunk build time: " << duration << std::endl;
+        VPGameObject gameObject = VPGameObject::create();
+        gameObject.transform.translation = {x*2.f, 0.f, x*2.f};
+        gameObject.transform.scale = {1.f, 1.f, 1.f};
+        gameObject.transform.rotation = {0.f, 0.f, 0.f};
+        VPModel::Builder builder{};
+        std::chrono::high_resolution_clock::time_point t3 = std::chrono::high_resolution_clock::now();
+        chunk.GetVertices(builder);
+        std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
+        auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>( t4 - t3 ).count();
+        std::cout << "Chunk vertices build time: " << duration2 << std::endl;
+        gameObject.model = std::make_shared<VPModel>(Device,builder);
+        gameObject.color = color;
+        std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
+        gameObjects.push_back(std::move(gameObject));
 
     }
+
 
 
 
