@@ -14,6 +14,7 @@
 #include "VPCamera.h"
 #include "Inputs/VPInputManager.h"
 #include "VPSimpleRenderSystem.h"
+#include "World/World.h"
 
 namespace VP {
 
@@ -51,6 +52,7 @@ namespace VP {
         VPSimpleRenderSystem simpleRenderSystem{Device, Renderer.GetSwapChainRenderPass()};
 
         std::vector<VPGameObject> gameObjects;
+        World world{};
 
     };
 

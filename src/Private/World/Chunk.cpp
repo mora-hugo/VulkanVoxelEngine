@@ -10,6 +10,8 @@
 #include <iostream>
 
 using namespace VP;
+
+
 namespace std {
     template<> struct hash<VP::VPModel::Vertex> {
         size_t operator()(VP::VPModel::Vertex const& vertex) const {
@@ -19,18 +21,16 @@ namespace std {
         }
     };
 }
-Chunk Chunk::Build() {
-    FastNoiseLite noise;
-    noise.SetFractalOctaves(5);
-    noise.SetFractalLacunarity(1.75);
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    noise.SetFractalType(FastNoiseLite::FractalType_FBm);
-    Chunk chunk;
+std::shared_ptr<Chunk> Chunk::Build(const glm::vec3& position) {
+
+    std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
+    chunk->position = position;
     for (size_t x = 0; x < Chunk::DEPTH; ++x) {
         for (size_t y = 0; y < Chunk::HEIGHT; ++y) {
             for (size_t z = 0; z < Chunk::DEPTH; ++z) {
-                Block& block = chunk.GetBlock(x, y, z);
-                float noiseValue = noise.GetNoise((float)x , (float)z);
+                Block& block = chunk->GetBlock(x, y, z);
+                block.parent_chunk = chunk;
+                float noiseValue = Chunk::noise.GetNoise((float)x+position.x , (float)z+position.z);
                 float height = y + (noiseValue * 100);
                 // Arrondir les coordonnées à l'entier le plus proche
                 int snappedX = static_cast<int>(x);
@@ -41,11 +41,14 @@ Chunk Chunk::Build() {
             }
         }
     }
-    return chunk;
+    return std::move(chunk);
 }
 
 Chunk::Chunk() {
-
+    Chunk::noise.SetFractalOctaves(5);
+    Chunk::noise.SetFractalLacunarity(1.75);
+    Chunk::noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    Chunk::noise.SetFractalType(FastNoiseLite::FractalType_FBm);
 }
 
 void Chunk::GetVertices(VP::VPModel::Builder &builder) {
@@ -59,6 +62,7 @@ void Chunk::GetVertices(VP::VPModel::Builder &builder) {
                     vertices.clear();
                     Chunk::GetVertices(vertices, block);
                     for (auto& vertex : vertices) {
+                        vertex.position += position;
                         if (uniqueVertices.count(vertex) == 0) {
                             uniqueVertices[vertex] = static_cast<uint32_t>(builder.vertices.size());
                             builder.vertices.push_back(vertex);

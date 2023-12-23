@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
         src/Private/Inputs/VPPlayerController.cpp
         src/Private/Rendering/VPUtils.cpp
         src/Private/World/Chunk.cpp
+        src/Private/World/World.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)

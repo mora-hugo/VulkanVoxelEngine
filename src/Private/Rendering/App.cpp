@@ -22,6 +22,7 @@
 #include "Inputs/VPPlayerController.h"
 #include "tiny_obj_loader.h"
 #include "World/Chunk.h"
+#include "World/World.h"
 
 
 void VP::App::run() {
@@ -86,29 +87,23 @@ VP::App::~App() {
 
 void VP::App::loadGameObjects() {
     glm::vec3 color = {1.0f, 0.0f, 0.0f};
-    for(int x = 0; x < 1; x++) {
-
-        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-        Chunk chunk = Chunk::Build();
-        std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-        std::cout << "Chunk build time: " << duration << std::endl;
+    /* Generate Chunk */
+    world.GenerateWorld();
+    std::vector<VPModel::Builder> builders;
+    world.GetVertices(builders);
+    for(auto& builder : builders) {
         VPGameObject gameObject = VPGameObject::create();
-        gameObject.transform.translation = {x*2.f, 0.f, x*2.f};
-        gameObject.transform.scale = {1.f, 1.f, 1.f};
+        gameObject.transform.translation = {0.f, 0.f, 0.f};
+        gameObject.transform.scale = {0.2f, 0.2f, 0.2f};
         gameObject.transform.rotation = {0.f, 0.f, 0.f};
-        VPModel::Builder builder{};
-        std::chrono::high_resolution_clock::time_point t3 = std::chrono::high_resolution_clock::now();
-        chunk.GetVertices(builder);
-        std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
-        auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>( t4 - t3 ).count();
-        std::cout << "Chunk vertices build time: " << duration2 << std::endl;
+        world.rootChunk->GetVertices(builder);
         gameObject.model = std::make_shared<VPModel>(Device,builder);
         gameObject.color = color;
         std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
         gameObjects.push_back(std::move(gameObject));
-
     }
+
+
 
 
 
