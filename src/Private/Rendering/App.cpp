@@ -40,7 +40,7 @@ void VP::App::run() {
         glfwPollEvents();
         float aspect = Renderer.GetAspectRatio();
         //camera.SetOrthographicProjection(-aspect, aspect, -1.f, 1.f, -1.f, 1.f);
-        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
+        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 200.f);
 
         // Process input and call callbacks
 
@@ -86,7 +86,7 @@ VP::App::~App() {
 
 void VP::App::loadGameObjects() {
     glm::vec3 color = {1.0f, 0.0f, 0.0f};
-    for(int x = -10; x < 10; x++) {
+    for(int x = 0; x < 1; x++) {
 
         std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         Chunk chunk = Chunk::Build();

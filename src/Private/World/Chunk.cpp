@@ -6,6 +6,7 @@
 #include "World/Chunk.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
+#include "../../lib/fast-noise-lite/FastNoiseLite.h"
 #include <iostream>
 
 using namespace VP;
@@ -19,12 +20,23 @@ namespace std {
     };
 }
 Chunk Chunk::Build() {
+    FastNoiseLite noise;
+    noise.SetFractalOctaves(5);
+    noise.SetFractalLacunarity(1.75);
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetFractalType(FastNoiseLite::FractalType_FBm);
     Chunk chunk;
     for (size_t x = 0; x < Chunk::DEPTH; ++x) {
         for (size_t y = 0; y < Chunk::HEIGHT; ++y) {
             for (size_t z = 0; z < Chunk::DEPTH; ++z) {
-                Block& block = chunk.GetBlock(x,y,z);
-                block.position = glm::vec3{x,y,z};
+                Block& block = chunk.GetBlock(x, y, z);
+                float noiseValue = noise.GetNoise((float)x , (float)z);
+                float height = y + (noiseValue * 100);
+                // Arrondir les coordonnées à l'entier le plus proche
+                int snappedX = static_cast<int>(x);
+                int snappedY = static_cast<int>(height); // Utiliser la hauteur calculée
+                int snappedZ = static_cast<int>(z);
+                block.position = glm::vec3{snappedX, snappedY, snappedZ};
                 block.id = 1;
             }
         }

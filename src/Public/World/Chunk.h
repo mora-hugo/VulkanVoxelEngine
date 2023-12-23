@@ -13,6 +13,8 @@ using block_id_t = uint16_t;
 struct Block {
     block_id_t id = 0;
     glm::vec3 position {0};
+
+    class Chunk *parent_chunk = nullptr;
 };
 struct Chunk {
 public:
@@ -26,12 +28,16 @@ public:
 
     static Chunk Build();
 
-    static void GetVertices(std::vector<VP::VPModel::Vertex>& vertices, const Block& block);
+
 
     void GetVertices(VP::VPModel::Builder& builder);
 
 private:
+    static void GetVertices(std::vector<VP::VPModel::Vertex>& vertices, const Block& block);
+
     Chunk();
+
+
 
 };
 
