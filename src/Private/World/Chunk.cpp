@@ -59,6 +59,7 @@ Chunk::Chunk() {
 void Chunk::GetVertices(VP::VPModel::Builder &builder) {
     std::vector<VPModel::Vertex> vertices;
     vertices.reserve(Chunk::DEPTH * Chunk::DEPTH * Chunk::HEIGHT * 6 * 4);
+    std::unordered_map<VPModel::Vertex, uint32_t> uniqueVertices{};
 
     for (auto& blockRow : blocks) {
         for (auto& blockColumn : blockRow) {
@@ -69,7 +70,11 @@ void Chunk::GetVertices(VP::VPModel::Builder &builder) {
                     Chunk::GetVertices(vertices, block);
                     for (auto& vertex : vertices) {
                         vertex.position += position;
-                        builder.vertices.push_back(vertex);
+                        if (uniqueVertices.count(vertex) == 0) {
+                            uniqueVertices[vertex] = static_cast<uint32_t>(builder.vertices.size());
+                            builder.vertices.push_back(vertex);
+                        }
+                        builder.indices.push_back(uniqueVertices[vertex]);
                     }
                 }
             }

@@ -10,9 +10,7 @@
 #include "../../../lib/fast-noise-lite/FastNoiseLite.h"
 
 using block_id_t = uint16_t;
-struct Face {
-    std::array<glm::vec3, 6> vertices;
-};
+
 struct Block {
     const static inline uint8_t TOP_FACE = 0;
     const static inline uint8_t BOTTOM_FACE = 1;
@@ -23,7 +21,6 @@ struct Block {
 
     block_id_t id = 0;
     glm::vec3 position {0};
-    std::array<Face, 6> faces;
 
     std::shared_ptr<class Chunk> parent_chunk;
 };

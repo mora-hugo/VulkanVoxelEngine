@@ -99,6 +99,7 @@ void VP::App::loadGameObjects() {
     world.GetVertices(builders);
     auto end2 = std::chrono::high_resolution_clock::now();
     std::cout << "World vertex generation took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count() << "ms" << std::endl;
+    long int vertexCount = 0;
     for(auto& builder : builders) {
         if(builder.vertices.size() == 0) {
             continue;
@@ -109,9 +110,12 @@ void VP::App::loadGameObjects() {
         gameObject.transform.rotation = {0.f, 0.f, 0.f};
         gameObject.model = std::make_shared<VPModel>(Device,builder);
         gameObject.color = color;
+        vertexCount += builder.vertices.size();
+
         //std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
         gameObjects.push_back(std::move(gameObject));
     }
+    std::cout << "Total vertex count: " << vertexCount << std::endl;
 
 
 

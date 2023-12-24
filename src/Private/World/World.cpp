@@ -28,8 +28,8 @@ void World::GenerateWorld() {
     JobSystem jobSystem(threads-1, 65536);
     Job* parent = jobSystem.CreateEmptyJob();
 
-    for (int x = 0; x < 20; x++) {
-        for (int z = 0; z < 20; z++) {
+    for (int x = 0; x < 40; x++) {
+        for (int z = 0; z < 40; z++) {
             auto* data = new GenerateWorldJobData(); // Crée une nouvelle instance de GenerateWorldJobData
             data->chunks = &chunks;
             data->x = x;
