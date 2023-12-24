@@ -107,7 +107,9 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
     }
 
 
+
     //top
+
     if(topBlock && topBlock->id == 0) {
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}});
         vertices.push_back({block->position + glm::vec3{.5f, -.5f, .5f}, {.9f, .6f, .1f}});

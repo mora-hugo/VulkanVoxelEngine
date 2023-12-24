@@ -6,15 +6,10 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
 class World {
-    struct MyJobData {
-        std::unordered_map<glm::vec2, std::shared_ptr<Chunk>>* chunks;
-        int x;
-        int z;
 
-    };
 public:
 
-    Block * GetBlockWorld(int x, int y, int z);
+    std::shared_ptr<Block> GetBlockWorld(int x, int y, int z);
 
     std::shared_ptr<Chunk> GetChunkAtCoords(glm::vec3 position);
 
@@ -27,15 +22,13 @@ public:
     void GetVertices(std::vector<VP::VPModel::Builder>& builders);
 
 private:
+    /* Jobs functions */
+    static void Job_BuildChunk(void* data);
+    static void Job_GetVertices(void* data);
 
-    static void MakeJob(void* data);
 
-    static void MakeJob2(void* data);
-
-
-    void GenerateSimblings(std::shared_ptr<Chunk>& chunk);
     std::shared_ptr<Chunk> GenerateChunk(glm::vec3 position);
-    /* Chunk at 0,0,0 */
+
 
 };
 

@@ -3,9 +3,24 @@
 #include <iostream>
 #include "World/World.h"
 #include "JobSystem.h"
+/* Structures used to pass data to the job */
+struct GenerateWorldJobData {
+    std::unordered_map<glm::vec2, std::shared_ptr<Chunk>>* chunks = nullptr;
+    int x = 0;
+    int z = 0;
 
-Block *World::GetBlockWorld(int x, int y, int z) {
-    return nullptr;
+};
+struct GetVerticesJobData {
+    std::shared_ptr<Chunk> chunk = nullptr;
+    std::vector<VP::VPModel::Builder>* builders = nullptr;
+    int i = 0;
+};
+
+std::shared_ptr<Block> World::GetBlockWorld(int x, int y, int z) {
+    auto chunk = GetChunkAtCoords({x,y,z});
+    if(!chunk) return nullptr;
+
+    return chunk->GetBlock(x - chunk->position.x, y - chunk->position.y, z - chunk->position.z);
 }
 
 void World::GenerateWorld() {
@@ -13,13 +28,13 @@ void World::GenerateWorld() {
     JobSystem jobSystem(threads-1, 65536);
     Job* parent = jobSystem.CreateEmptyJob();
 
-    for (int x = 0; x < 60; x++) {
-        for (int z = 0; z < 60; z++) {
-            MyJobData* data = new MyJobData(); // Crée une nouvelle instance de MyJobData
+    for (int x = 0; x < 20; x++) {
+        for (int z = 0; z < 20; z++) {
+            auto* data = new GenerateWorldJobData(); // Crée une nouvelle instance de GenerateWorldJobData
             data->chunks = &chunks;
             data->x = x;
             data->z = z;
-            Job *job = jobSystem.CreateJobAsChild(MakeJob, parent, (void*)data);
+            Job *job = jobSystem.CreateJobAsChild(Job_BuildChunk, parent, (void *) data);
             jobSystem.Run(job);
         }
     }
@@ -32,14 +47,6 @@ std::shared_ptr<Chunk> World::GenerateChunk(glm::vec3 position) {
     return Chunk::Build(position);
 }
 
-void World::GenerateSimblings(std::shared_ptr<Chunk>& chunk) {
-
-}
-struct MyJobData2 {
-    std::shared_ptr<Chunk> chunk;
-    std::vector<VP::VPModel::Builder>* builders;
-    int i = 0;
-};
 void World::GetVertices(std::vector<VP::VPModel::Builder>& builders) {
     const size_t threads = std::thread::hardware_concurrency();
     builders.resize(chunks.size());
@@ -48,11 +55,11 @@ void World::GetVertices(std::vector<VP::VPModel::Builder>& builders) {
     Job* parent = jobSystem.CreateEmptyJob();
     int i = 0;
     for(auto& chunk : chunks) {
-        MyJobData2* data = new MyJobData2(); // Crée une nouvelle instance de MyJobData
+        auto  data = new GetVerticesJobData();
         data->chunk = chunk.second;
         data->builders = &builders;
         data->i = i;
-        Job *job = jobSystem.CreateJobAsChild(MakeJob2, parent, (void*)data);
+        Job *job = jobSystem.CreateJobAsChild(Job_GetVertices, parent, (void *) data);
         jobSystem.Run(job);
         i++;
 
@@ -60,25 +67,26 @@ void World::GetVertices(std::vector<VP::VPModel::Builder>& builders) {
     jobSystem.Run(parent);
     jobSystem.Wait(parent);
 
-
-
-
 }
-void World::MakeJob2(void *data) {
-    MyJobData2* myData = (MyJobData2*)data;
-    std::vector<VP::VPModel::Builder>* builders = myData->builders;
-    myData->chunk->GetVertices(builders->at(myData->i));
-    delete myData;
-}
+
 
 std::shared_ptr<Chunk> World::GetChunkAtCoords(glm::vec3 position) {
-    return nullptr;
+    glm::vec2 chunkPosition {0};
+    chunkPosition.x = (int)std::floor(position.x / Chunk::DEPTH);
+    chunkPosition.y = (int)std::floor(position.z / Chunk::DEPTH);
+    return chunks.count(chunkPosition) > 0 ? chunks.at(chunkPosition) : nullptr;
 }
 
-void World::MakeJob(void *data) {
-    MyJobData* myData = (MyJobData*)data;
+void World::Job_BuildChunk(void *data) {
+    auto* myData = (GenerateWorldJobData*)data;
     myData->chunks->insert({glm::vec2({myData->x,myData->z}), Chunk::Build({myData->x*Chunk::DEPTH,0,myData->z*Chunk::DEPTH})});
-    delete myData;
+    delete myData; //TODO
+}
 
+void World::Job_GetVertices(void *data) {
+    auto * myData = (GetVerticesJobData *)data;
+    std::vector<VP::VPModel::Builder>* builders = myData->builders;
+    myData->chunk->GetVertices(builders->at(myData->i));
+    delete myData; //TODO
 }
 

@@ -49,6 +49,7 @@ void VP::App::run() {
 
         inputManager.ProcessInput();
 
+
         if(auto commandBuffer = Renderer.BeginFrame()) {
 
             //Begin offscreen shadow pass
@@ -86,10 +87,11 @@ VP::App::~App() {
 }
 
 void VP::App::loadGameObjects() {
-    glm::vec3 color = {1.0f, 0.0f, 0.0f};
+    glm::vec3 color = {0.0f, 0.0f, 0.0f};
     /* Generate Chunk */
     auto start = std::chrono::high_resolution_clock::now();
     world.GenerateWorld();
+
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "World generation took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
     std::vector<VPModel::Builder> builders;
@@ -103,7 +105,7 @@ void VP::App::loadGameObjects() {
         }
         VPGameObject gameObject = VPGameObject::create();
         gameObject.transform.translation = {0.f, 0.f,  0.f};
-        gameObject.transform.scale = {0.01f, 0.01f, 0.01f};
+        gameObject.transform.scale = {1.f, 1.f, 1.f};
         gameObject.transform.rotation = {0.f, 0.f, 0.f};
         gameObject.model = std::make_shared<VPModel>(Device,builder);
         gameObject.color = color;
