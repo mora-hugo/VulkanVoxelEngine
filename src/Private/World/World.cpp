@@ -1,5 +1,6 @@
 
 
+#include <iostream>
 #include "World/World.h"
 
 Block *World::GetBlockWorld(int x, int y, int z) {
@@ -7,9 +8,11 @@ Block *World::GetBlockWorld(int x, int y, int z) {
 }
 
 void World::GenerateWorld() {
-    for (int x = -10; x < 10; x++) {
-        for (int z = -10; z < 10; z++) {
+    for (int x = 0; x < 10; x++) {
+        for (int z = 0; z < 10; z++) {
+            std::cout << "Generating chunk at " << x << " " << z << std::endl;
             chunks[glm::vec2({x,z})] = Chunk::Build({x*Chunk::DEPTH,0,z*Chunk::DEPTH});
+
         }
     }
 
@@ -33,7 +36,6 @@ void World::GetVertices(std::vector<VP::VPModel::Builder>& builders) {
         builders.push_back(builder);
 
     }
-
 
 
 }

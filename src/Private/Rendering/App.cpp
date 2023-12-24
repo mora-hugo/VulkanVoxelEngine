@@ -92,6 +92,9 @@ void VP::App::loadGameObjects() {
     std::vector<VPModel::Builder> builders;
     world.GetVertices(builders);
     for(auto& builder : builders) {
+        if(builder.vertices.size() == 0) {
+            continue;
+        }
         VPGameObject gameObject = VPGameObject::create();
         gameObject.transform.translation = {0.f, 0.f,  0.f};
         gameObject.transform.scale = {0.2f, 0.2f, 0.2f};

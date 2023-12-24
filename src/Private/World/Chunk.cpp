@@ -22,30 +22,35 @@ namespace std {
     };
 }
 std::shared_ptr<Chunk> Chunk::Build(const glm::vec3& position) {
-    std::cout << "Building chunk at " << position.x << " " << position.y << " " << position.z << std::endl;
     std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
     chunk->position = position;
     for (size_t x = 0; x < Chunk::DEPTH; ++x) {
-        for (size_t y = 0; y < Chunk::HEIGHT; ++y) {
             for (size_t z = 0; z < Chunk::DEPTH; ++z) {
-                Block& block = chunk->GetBlock(x, y, z);
-                block.parent_chunk = chunk;
-                float noiseValue = Chunk::noise.GetNoise((float)x+position.x , (float)z+position.z);
-                float height = y + (noiseValue * 100);
+                    for(size_t y = 0; y < Chunk::HEIGHT; ++y) {
+                        chunk->blocks[y][x][z] = std::make_shared<Block>();
+                        chunk->blocks[y][x][z]->position = {x,y,z};
+                        chunk->blocks[y][x][z]->parent_chunk = chunk;
 
-                int snappedX = static_cast<int>(x);
-                int snappedY = static_cast<int>(height);
-                int snappedZ = static_cast<int>(z);
-                block.position = glm::vec3{snappedX, snappedY, snappedZ};
-                block.id = 1;
+                        int noiseValue = static_cast<int>((std::clamp<float>(-1,1,Chunk::noise.GetNoise((float)x+position.x , (float)z+position.z)) *100+100));
+                        if(y > noiseValue) {
+                            chunk->blocks[y][x][z]->id = 1;
+                        }
+                        else {
+                            chunk->blocks[y][x][z]->id = 0;
+                        }
+
+
+                    }
+
+
             }
-        }
     }
     return std::move(chunk);
 }
 
 Chunk::Chunk() {
     Chunk::noise.SetFractalOctaves(5);
+    Chunk::noise.SetSeed(13347);
     Chunk::noise.SetFractalLacunarity(1.75);
     Chunk::noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     Chunk::noise.SetFractalType(FastNoiseLite::FractalType_FBm);
@@ -58,7 +63,7 @@ void Chunk::GetVertices(VP::VPModel::Builder &builder) {
     for (auto& blockRow : blocks) {
         for (auto& blockColumn : blockRow) {
             for (auto& block : blockColumn) {
-                if (block.id != 0) {
+                if (block && block->id != 0) {
                     vertices.clear();
                     Chunk::GetVertices(vertices, block);
                     for (auto& vertex : vertices) {
@@ -75,59 +80,88 @@ void Chunk::GetVertices(VP::VPModel::Builder &builder) {
     }
 }
 
-Block &Chunk::GetBlock(uint8_t x, uint8_t y, uint8_t z) {
+std::shared_ptr<Block> Chunk::GetBlock(uint8_t x, uint8_t y, uint8_t z) {
+    if(x >= Chunk::DEPTH || y >= Chunk::HEIGHT || z >= Chunk::DEPTH || x < 0 || y < 0 || z < 0) {
+        return nullptr;
+    }
     return blocks[y][x][z];
 }
 
-void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const Block& block) {
+void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::shared_ptr<Block>& block) {
 
-    vertices = {
-            {block.position + glm::vec3{-.5f, -.5f, -.5f} , {.9f, .9f, .9f}},
-            {block.position + glm::vec3{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-            {block.position + glm::vec3{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-            {block.position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-            {block.position + glm::vec3{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-            {block.position + glm::vec3{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
 
-            // right face (yellow)
-            {block.position + glm::vec3{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+    std::shared_ptr<Block> topBlock = block->parent_chunk->GetBlock((int)block->position.x , (int)block->position.y-1, (int)block->position.z);
+    std::shared_ptr<Block> bottomBlock = block->parent_chunk->GetBlock((int)block->position.x , (int)block->position.y+1, (int)block->position.z);
+    std::shared_ptr<Block> leftBlock = block->parent_chunk->GetBlock((int)block->position.x-1 , (int)block->position.y, (int)block->position.z);
+    std::shared_ptr<Block> rightBlock = block->parent_chunk->GetBlock((int)block->position.x+1 , (int)block->position.y, (int)block->position.z);
+    std::shared_ptr<Block> frontBlock = block->parent_chunk->GetBlock((int)block->position.x , (int)block->position.y, (int)block->position.z+1);
+    std::shared_ptr<Block> backBlock = block->parent_chunk->GetBlock((int)block->position.x , (int)block->position.y, (int)block->position.z-1);
 
-            // top face (orange, remember y axis points down)
-            {block.position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {block.position + glm::vec3{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-            {block.position + glm::vec3{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-            {block.position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {block.position + glm::vec3{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {block.position + glm::vec3{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
 
-            // bottom face (red)
-            {block.position + glm::vec3{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-            {block.position + glm::vec3{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-            {block.position + glm::vec3{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+    if(!rightBlock || (rightBlock && rightBlock->id == 0)) {
 
-            // nose face (blue)
-            {block.position + glm::vec3{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {block.position + glm::vec3{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-            {block.position + glm::vec3{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-            {block.position + glm::vec3{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {block.position + glm::vec3{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {block.position + glm::vec3{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+        //right
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}});
+    }
 
-            // tail face (green)
-            {block.position + glm::vec3{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-            {block.position + glm::vec3{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-            {block.position + glm::vec3{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {block.position + glm::vec3{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-    };
+
+    //top
+    if(!topBlock || (topBlock && topBlock->id == 0)) {
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, .5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, -.5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, .5f}, {.9f, .6f, .1f}});
+    }
+
+
+
+    //left
+    if(!leftBlock || (leftBlock && leftBlock->id == 0)) {
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.8f, .8f, .1f}});
+    }
+
+    //bottom
+    if(!bottomBlock || (bottomBlock && bottomBlock->id == 0)) {
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, -.5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, -.5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, -.5f}, {.9f, .6f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.9f, .6f, .1f}});
+    }
+
+    //front
+    if(!frontBlock || (frontBlock && frontBlock->id == 0)) {
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, .5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}});
+    }
+
+    //back
+    if(!backBlock || (backBlock && backBlock->id == 0)) {
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, .5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
+        vertices.push_back({block->position + glm::vec3{.5f, .5f, -.5f}, {.8f, .8f, .1f}});
+    }
+
+
 }
 

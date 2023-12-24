@@ -25,15 +25,15 @@ struct Chunk {
     static inline FastNoiseLite noise;
 
     /* Y */
-    static constexpr int HEIGHT = 10;
+    static constexpr int HEIGHT = 128;
 
     /* X , Z */
     static constexpr int DEPTH = 16;
 
     // [X][Z][Y]
-    std::array<std::array<std::array<Block,DEPTH>,DEPTH>,HEIGHT> blocks;
+    std::array<std::array<std::array<std::shared_ptr<Block>,DEPTH>,DEPTH>,HEIGHT> blocks {std::make_shared<Block>()};
 
-    Block& GetBlock(uint8_t x, uint8_t y, uint8_t z);
+    std::shared_ptr<Block> GetBlock(uint8_t x, uint8_t y, uint8_t z);
 
     static std::shared_ptr<Chunk> Build(const glm::vec3& position);
 
@@ -45,7 +45,7 @@ struct Chunk {
 
 private:
 
-    static void GetVertices(std::vector<VP::VPModel::Vertex>& vertices, const Block& block);
+    static void GetVertices(std::vector<VP::VPModel::Vertex>& vertices, const std::shared_ptr<Block>& block);
 
 
 
