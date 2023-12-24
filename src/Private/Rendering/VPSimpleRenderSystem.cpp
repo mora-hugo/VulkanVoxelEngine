@@ -78,6 +78,7 @@ void VP::VPSimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, 
     auto projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
     for(auto& obj : gameObjects) {
 
+
         SimplePushConstantData push{};
 
         push.color = obj.color;

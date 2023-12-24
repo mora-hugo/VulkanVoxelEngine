@@ -13,8 +13,8 @@ add_subdirectory(lib/glm EXCLUDE_FROM_ALL)
 set(TINY_OBJ_LOADER ./lib/tinyobjloader)
 include_directories(${TINY_OBJ_LOADER})
 
-
 include_directories("${PROJECT_SOURCE_DIR}/src/Public")
+include_directories(lib/TinyJob)
 
 add_executable(${PROJECT_NAME}
         main.cpp
@@ -33,6 +33,10 @@ add_executable(${PROJECT_NAME}
         src/Private/Rendering/VPUtils.cpp
         src/Private/World/Chunk.cpp
         src/Private/World/World.cpp
+        lib/TinyJob/JobSystem.cpp
+        lib/TinyJob/Worker.cpp
+        lib/TinyJob/Job.cpp
+        lib/TinyJob/JobQueue.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)

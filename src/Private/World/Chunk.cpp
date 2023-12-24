@@ -31,7 +31,7 @@ std::shared_ptr<Chunk> Chunk::Build(const glm::vec3& position) {
                         chunk->blocks[y][x][z]->position = {x,y,z};
                         chunk->blocks[y][x][z]->parent_chunk = chunk;
 
-                        int noiseValue = static_cast<int>((std::clamp<float>(-1,1,Chunk::noise.GetNoise((float)x+position.x , (float)z+position.z)) *100+100));
+                        int noiseValue = static_cast<int>((std::clamp<float>(-1,1,Chunk::noise.GetNoise((float)x+position.x , (float)z+position.z)) *100 + 80))/2;
                         if(y > noiseValue) {
                             chunk->blocks[y][x][z]->id = 1;
                         }
@@ -57,22 +57,19 @@ Chunk::Chunk() {
 }
 
 void Chunk::GetVertices(VP::VPModel::Builder &builder) {
-    std::unordered_map<VPModel::Vertex, uint32_t> uniqueVertices{};
     std::vector<VPModel::Vertex> vertices;
+    vertices.reserve(Chunk::DEPTH * Chunk::DEPTH * Chunk::HEIGHT * 6 * 4);
 
     for (auto& blockRow : blocks) {
         for (auto& blockColumn : blockRow) {
             for (auto& block : blockColumn) {
                 if (block && block->id != 0) {
                     vertices.clear();
+
                     Chunk::GetVertices(vertices, block);
                     for (auto& vertex : vertices) {
                         vertex.position += position;
-                        if (uniqueVertices.count(vertex) == 0) {
-                            uniqueVertices[vertex] = static_cast<uint32_t>(builder.vertices.size());
-                            builder.vertices.push_back(vertex);
-                        }
-                        builder.indices.push_back(uniqueVertices[vertex]);
+                        builder.vertices.push_back(vertex);
                     }
                 }
             }
@@ -98,7 +95,7 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
     std::shared_ptr<Block> backBlock = block->parent_chunk->GetBlock((int)block->position.x , (int)block->position.y, (int)block->position.z-1);
 
 
-    if(!rightBlock || (rightBlock && rightBlock->id == 0)) {
+    if(rightBlock&& rightBlock->id == 0) {
 
         //right
         vertices.push_back({block->position + glm::vec3{.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
@@ -111,7 +108,7 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
 
 
     //top
-    if(!topBlock || (topBlock && topBlock->id == 0)) {
+    if(topBlock && topBlock->id == 0) {
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}});
         vertices.push_back({block->position + glm::vec3{.5f, -.5f, .5f}, {.9f, .6f, .1f}});
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.9f, .6f, .1f}});
@@ -123,7 +120,7 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
 
 
     //left
-    if(!leftBlock || (leftBlock && leftBlock->id == 0)) {
+    if(leftBlock && leftBlock->id == 0) {
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
         vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.8f, .8f, .1f}});
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.8f, .8f, .1f}});
@@ -133,7 +130,7 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
     }
 
     //bottom
-    if(!bottomBlock || (bottomBlock && bottomBlock->id == 0)) {
+    if(bottomBlock && bottomBlock->id == 0) {
         vertices.push_back({block->position + glm::vec3{-.5f, .5f, -.5f}, {.9f, .6f, .1f}});
         vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.9f, .6f, .1f}});
         vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.9f, .6f, .1f}});
@@ -143,7 +140,7 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
     }
 
     //front
-    if(!frontBlock || (frontBlock && frontBlock->id == 0)) {
+    if(frontBlock && frontBlock->id == 0) {
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, .5f}, {.8f, .8f, .1f}});
         vertices.push_back({block->position + glm::vec3{.5f, .5f, .5f}, {.8f, .8f, .1f}});
         vertices.push_back({block->position + glm::vec3{-.5f, .5f, .5f}, {.8f, .8f, .1f}});
@@ -153,7 +150,7 @@ void Chunk::GetVertices(std::vector<VP::VPModel::Vertex> &vertices, const std::s
     }
 
     //back
-    if(!backBlock || (backBlock && backBlock->id == 0)) {
+    if(backBlock && backBlock->id == 0) {
         vertices.push_back({block->position + glm::vec3{-.5f, -.5f, -.5f}, {.8f, .8f, .1f}});
         vertices.push_back({block->position + glm::vec3{.5f, .5f, -.5f}, {.8f, .8f, .1f}});
         vertices.push_back({block->position + glm::vec3{-.5f, .5f, -.5f}, {.8f, .8f, .1f}});

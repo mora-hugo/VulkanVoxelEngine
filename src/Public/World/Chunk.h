@@ -45,6 +45,7 @@ struct Chunk {
 
 private:
 
+
     static void GetVertices(std::vector<VP::VPModel::Vertex>& vertices, const std::shared_ptr<Block>& block);
 
 

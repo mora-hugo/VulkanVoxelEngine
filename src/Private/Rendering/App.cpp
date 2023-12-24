@@ -41,7 +41,7 @@ void VP::App::run() {
         glfwPollEvents();
         float aspect = Renderer.GetAspectRatio();
         //camera.SetOrthographicProjection(-aspect, aspect, -1.f, 1.f, -1.f, 1.f);
-        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 200.f);
+        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 2000.f);
 
         // Process input and call callbacks
 
@@ -88,20 +88,26 @@ VP::App::~App() {
 void VP::App::loadGameObjects() {
     glm::vec3 color = {1.0f, 0.0f, 0.0f};
     /* Generate Chunk */
+    auto start = std::chrono::high_resolution_clock::now();
     world.GenerateWorld();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "World generation took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
     std::vector<VPModel::Builder> builders;
+    auto start2 = std::chrono::high_resolution_clock::now();
     world.GetVertices(builders);
+    auto end2 = std::chrono::high_resolution_clock::now();
+    std::cout << "World vertex generation took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count() << "ms" << std::endl;
     for(auto& builder : builders) {
         if(builder.vertices.size() == 0) {
             continue;
         }
         VPGameObject gameObject = VPGameObject::create();
         gameObject.transform.translation = {0.f, 0.f,  0.f};
-        gameObject.transform.scale = {0.2f, 0.2f, 0.2f};
+        gameObject.transform.scale = {0.01f, 0.01f, 0.01f};
         gameObject.transform.rotation = {0.f, 0.f, 0.f};
         gameObject.model = std::make_shared<VPModel>(Device,builder);
         gameObject.color = color;
-        std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
+        //std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
         gameObjects.push_back(std::move(gameObject));
     }
 
