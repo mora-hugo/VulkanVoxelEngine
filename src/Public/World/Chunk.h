@@ -28,7 +28,7 @@ struct Chunk {
     static constexpr int HEIGHT = 10;
 
     /* X , Z */
-    static constexpr int DEPTH = 64;
+    static constexpr int DEPTH = 16;
 
     // [X][Z][Y]
     std::array<std::array<std::array<Block,DEPTH>,DEPTH>,HEIGHT> blocks;
@@ -43,10 +43,6 @@ struct Chunk {
 
     void GetVertices(VP::VPModel::Builder& builder);
 
-    std::shared_ptr<Chunk> Left;
-    std::shared_ptr<Chunk> Right;
-    std::shared_ptr<Chunk> Front;
-    std::shared_ptr<Chunk> Back;
 private:
 
     static void GetVertices(std::vector<VP::VPModel::Vertex>& vertices, const Block& block);

@@ -22,7 +22,7 @@ namespace std {
     };
 }
 std::shared_ptr<Chunk> Chunk::Build(const glm::vec3& position) {
-
+    std::cout << "Building chunk at " << position.x << " " << position.y << " " << position.z << std::endl;
     std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
     chunk->position = position;
     for (size_t x = 0; x < Chunk::DEPTH; ++x) {
@@ -32,9 +32,9 @@ std::shared_ptr<Chunk> Chunk::Build(const glm::vec3& position) {
                 block.parent_chunk = chunk;
                 float noiseValue = Chunk::noise.GetNoise((float)x+position.x , (float)z+position.z);
                 float height = y + (noiseValue * 100);
-                // Arrondir les coordonnées à l'entier le plus proche
+
                 int snappedX = static_cast<int>(x);
-                int snappedY = static_cast<int>(height); // Utiliser la hauteur calculée
+                int snappedY = static_cast<int>(height);
                 int snappedZ = static_cast<int>(z);
                 block.position = glm::vec3{snappedX, snappedY, snappedZ};
                 block.id = 1;
@@ -47,7 +47,7 @@ std::shared_ptr<Chunk> Chunk::Build(const glm::vec3& position) {
 Chunk::Chunk() {
     Chunk::noise.SetFractalOctaves(5);
     Chunk::noise.SetFractalLacunarity(1.75);
-    Chunk::noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    Chunk::noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     Chunk::noise.SetFractalType(FastNoiseLite::FractalType_FBm);
 }
 

@@ -3,12 +3,18 @@
 #include "World/World.h"
 
 Block *World::GetBlockWorld(int x, int y, int z) {
-
+    return nullptr;
 }
 
 void World::GenerateWorld() {
-    rootChunk = Chunk::Build({0,0,0});
-    GenerateSimblings(rootChunk);
+    for (int x = -10; x < 10; x++) {
+        for (int z = -10; z < 10; z++) {
+            chunks[glm::vec2({x,z})] = Chunk::Build({x*Chunk::DEPTH,0,z*Chunk::DEPTH});
+        }
+    }
+
+
+
 
 }
 
@@ -17,39 +23,21 @@ std::shared_ptr<Chunk> World::GenerateChunk(glm::vec3 position) {
 }
 
 void World::GenerateSimblings(std::shared_ptr<Chunk>& chunk) {
-    chunk->Left = GenerateChunk(chunk->position + glm::vec3{-Chunk::DEPTH, 0, 0});
-    chunk->Right = GenerateChunk(chunk->position + glm::vec3{Chunk::DEPTH, 0, 0});
-    chunk->Front = GenerateChunk(chunk->position + glm::vec3{0, 0, Chunk::DEPTH});
-    chunk->Back = GenerateChunk(chunk->position + glm::vec3{0, 0, -Chunk::DEPTH});
+
 }
 
 void World::GetVertices(std::vector<VP::VPModel::Builder>& builders) {
-    VP::VPModel::Builder builder {};
-    rootChunk->GetVertices(builder);
-    builders.push_back(builder);
-
-    /* Make same to root chunks simblings */
-    if(rootChunk->Left) {
-        VP::VPModel::Builder builder1 {};
-        rootChunk->Left->GetVertices(builder1);
-        builders.push_back(builder1);
-    }
-    if(rootChunk->Right) {
-        VP::VPModel::Builder builder2 {};
-        rootChunk->Right->GetVertices(builder2);
+    for(auto& chunk : chunks) {
+        VP::VPModel::Builder builder {};
+        chunk.second->GetVertices(builder);
         builders.push_back(builder);
-    }
-    if(rootChunk->Front) {
-        VP::VPModel::Builder builder3 {};
-        rootChunk->Front->GetVertices(builder3);
-        builders.push_back(builder3);
-    }
-    if(rootChunk->Back) {
-        VP::VPModel::Builder builder4 {};
-        rootChunk->Back->GetVertices(builder4);
-        builders.push_back(builder4);
+
     }
 
 
+
+}
+
+std::shared_ptr<Chunk> World::GetChunkAtCoords(glm::vec3 position) {
 
 }

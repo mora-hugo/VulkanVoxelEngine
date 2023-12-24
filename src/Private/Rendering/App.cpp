@@ -93,10 +93,9 @@ void VP::App::loadGameObjects() {
     world.GetVertices(builders);
     for(auto& builder : builders) {
         VPGameObject gameObject = VPGameObject::create();
-        gameObject.transform.translation = {0.f, 0.f, 0.f};
+        gameObject.transform.translation = {0.f, 0.f,  0.f};
         gameObject.transform.scale = {0.2f, 0.2f, 0.2f};
         gameObject.transform.rotation = {0.f, 0.f, 0.f};
-        world.rootChunk->GetVertices(builder);
         gameObject.model = std::make_shared<VPModel>(Device,builder);
         gameObject.color = color;
         std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
